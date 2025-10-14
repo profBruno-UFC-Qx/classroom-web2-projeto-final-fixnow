@@ -6,8 +6,8 @@ O FixNow é uma aplicaçõa web que facilita o agendamento de serviços de manun
 
 ## :technologist: Membros da equipe
 
-556338 - Francisca Tatiely de Lima Nobre - SI;
-554698 - Kaio Davidson Santos Sampaio - SI.
+- 556338 - Francisca Tatiely de Lima Nobre - SI;
+- 554698 - Kaio Davidson Santos Sampaio - SI.
 
 ## :bulb: Objetivo Geral
 Desenvolver um sistema web completo de agendamento e gerenciamento de serviços técnicos, que possibilite a interação entre clientes e prestadores, oferecendo uma plataforma moderna, segura e eficiente para o controle de solicitações e atendimentos.
@@ -20,9 +20,9 @@ Otimizar processos de solicitação e prestação de serviço, melhorando a comu
 
 ## :people_holding_hands: Papéis ou tipos de usuário da aplicação
 
-Usuário não logado - Pode visualizar informações básicas sobre serviços disponíveis, mas não pode agendar pelo sistema;
-Cliente - Pode criar e gerenciar agendamentos, visualizar status, cancelar solicitações e editar perfil;
-Técnico (Prestador de serviço) - Pode visualizar agendamentos recebidos, confirmar ou marcar como concluido e editar disponibilidade;
+- Usuário não logado - Pode visualizar informações básicas sobre serviços disponíveis, mas não pode agendar pelo sistema;
+- Cliente - Pode criar e gerenciar agendamentos, visualizar status, cancelar solicitações e editar perfil;
+- Técnico (Prestador de serviço) - Pode visualizar agendamentos recebidos, confirmar ou marcar como concluido e editar disponibilidade;
 
 ## :triangular_flag_on_post:	 Principais funcionalidades da aplicação
 
