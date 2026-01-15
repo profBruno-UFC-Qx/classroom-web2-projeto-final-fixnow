@@ -5,7 +5,10 @@ export const enum userRole {
 }
 
 export interface User {
+  id: number;
   name: string;
   email: string;
   role: userRole;
+  profession?: string;
+  [key: string]: any; // Permite outras propriedades dinâmicas do backend
 }

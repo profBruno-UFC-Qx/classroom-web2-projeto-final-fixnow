@@ -1,167 +1,145 @@
 <script setup lang="ts">
-    import { reactive, ref, computed } from 'vue';
-    import { useRouter } from 'vue-router';
-    import { api } from '../services/api';
-    import { userRole } from '../types/roles';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { api } from '../services/api';
+import Input from '../components/Input.vue';
+import Password from '../components/Password.vue';
 
+const router = useRouter();
 
-    import Input from '../components/Input.vue';
-    import Password from '../components/Password.vue';
+const name = ref('');
+const email = ref('');
+const password = ref('');
+const role = ref('CLIENTE');
+const profession = ref('');
+const errorMessage = ref('');
 
-    const router = useRouter();
-
-    const form = reactive({
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      role: userRole.CLIENTE,
-    });
-
-    const loading = ref(false);
-    const errorMessage = ref('');
-    const successMessage = ref('');
-
-    //computeds
-    const isCliente = computed(() => form.role === userRole.CLIENTE);
-    const isAdmin = computed(() => form.role === userRole.ADMIN);
-    const isTecnico = computed(() => form.role === userRole.TECNICO);
-    const passwordsMatch = computed(() => form.password === form.confirmPassword);
-
-    async function registerUser(){
-      errorMessage.value = '';
-      successMessage.value = '';
-
-      if(!form.username || !form.email || !form.password || !form.confirmPassword){
-        errorMessage.value = 'Preencha todos os campos.';
-        return;
-      }
-      if(!passwordsMatch.value){
-        errorMessage.value = 'As senhas não coincidem.';
-        return;
-      }
-
-      try {
-        loading.value = true;
-        await api.post('/auth/register', {
-          username: form.username,
-          email: form.email,
-          password: form.password,
-          role: form.role
-        });
-        successMessage.value = 'Cadastro realizado com sucesso!';
-        setTimeout(() => router.push('/login'), 2000);
-      } catch (error: any) {
-        errorMessage.value = error.response?.data?.message || 'Erro ao realizar cadastro.';
-      } finally {
-        loading.value = false;
-      }
+async function register() {
+  errorMessage.value = '';
+  try {
+    if (!name.value || !email.value || !password.value) {
+      errorMessage.value = 'Por favor, preencha todos os campos obrigatórios.';
+      return;
     }
 
-</script>
-<template>
-  <div class="form-container">
-    <h1>Criar conta</h1>
-    <UsertypeSelector v-model="form.role" />
-    <form @submit.prevent="registerUser">
-      <Input label="Nome" v-model="form.username" placeholder="Digite seu nome" required/>
-      <Input label="Email" type="email" v-model="form.email" placeholder="Digite seu email" required/>
-      <Password label="Senha" v-model="form.password" placeholder="Digite sua senha"/>
-      <Password label="Confirmar Senha" v-model="form.confirmPassword" placeholder="Confirme sua senha"/>
-      <button type="submit" class="submit-btn" :disabled="loading">
-        {{ loading ? 'Cadastrando...' : 'Cadastrar' }}
-      </button>
-      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="success">{{ successMessage }}</p>
-
-      <button id="login-button" type="button">
-        <router-link to="/login">Já possui uma conta? Faça login</router-link>
-      </button>
-  
-    </form>
-      
+    if (role.value === 'TECNICO' && !profession.value) {
+      errorMessage.value = 'Por favor, informe a profissão.';
+      return;
+    }
     
+    const userData = {
+      name: name.value,
+      email: email.value,
+      password: password.value,
+      role: role.value,
+      profession: profession.value
+    };
+
+    await api.post('/users', userData);
+    router.push('/login');
+  } catch (error) {
+    console.error('Erro ao registrar:', error);
+    errorMessage.value = 'Erro ao registrar usuário.';
+  }
+}
+</script>
+
+<template>
+  <div class="register-container">
+    <div class="register-card">
+      <h1>Crie sua conta</h1>
+      <form @submit.prevent="register">
+        <Input label="Nome" v-model="name" placeholder="Seu nome completo" required />
+        <Input label="Email" type="email" v-model="email" placeholder="seu@email.com" required />
+        <Password label="Senha" v-model="password" placeholder="Crie uma senha" />
+
+        <div class="form-group">
+          <label for="role">Tipo de Conta</label>
+          <select id="role" v-model="role" class="form-select">
+            <option value="CLIENTE">Cliente</option>
+            <option value="TECNICO">Técnico</option>
+          </select>
+        </div>
+
+        
+        <div v-if="role === 'TECNICO'" class="form-group">
+          <Input label="Profissão" v-model="profession" placeholder="Ex: Eletricista, Encanador" />
+        </div>
+
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        <button type="submit" class="btn-register">Cadastrar</button>
+      </form>
+      <p class="login-link">
+        Já tem uma conta? <router-link to="/login">Faça Login</router-link>
+      </p>
+    </div>
   </div>
-
 </template>
+
 <style scoped>
-.form-container {
-  max-width: 400px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
-}
-
-h1 {
-  text-align: center;
-  color: #2e7d32; /* Verde escuro */
-  margin-bottom: 1.5rem;
-}
-
-form {
+.register-container {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  margin-top: 80px;
 }
-
-.submit-btn {
-  background-color: #4CAF50; /* Verde base */
-  color: white;
+.register-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+h1 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #2e7d32;
+}
+.form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+.form-select {
+  width: 100%;
   padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: white;
+}
+.btn-register {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #4CAF50;
+  color: white;
   border: none;
   border-radius: 4px;
+  cursor: pointer;
   font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
   margin-top: 1rem;
 }
-
-.submit-btn:hover:not(:disabled) {
-  background-color: #45a049; /* Verde um pouco mais escuro */
+.btn-register:hover {
+  background-color: #2e7d32;
 }
-
-.submit-btn:disabled {
-  background-color: #a5d6a7;
-  cursor: not-allowed;
-}
-
-.error {
-  color: #d32f2f;
-  text-align: center;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-.success {
-  color: #2e7d32;
-  text-align: center;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-#login-button {
-  background: none;
-  border: none;
-  padding: 0;
+.login-link {
   margin-top: 1.5rem;
-  font-family: inter, sans-serif;
-  cursor: pointer;
-  width: 100%;
-}
-
-#login-button a {
-  color: #2e7d32; /* Verde escuro */
-  text-decoration: none;
-  font-weight: 600;
   font-size: 0.9rem;
-  transition: color 0.3s;
+  text-align: center;
 }
-
-#login-button a:hover {
-  text-decoration: underline;
+.login-link a {
+  color: #2e7d32;
+  text-decoration: none;
+}
+.error-message {
+  color: #d32f2f;
+  margin-top: 1rem;
+  text-align: center;
 }
 </style>

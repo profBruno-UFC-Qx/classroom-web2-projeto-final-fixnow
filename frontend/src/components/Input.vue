@@ -32,9 +32,10 @@ function handleInput(event: Event) {
 <style scoped>
 .input-field {
   display: flex;
+  align-self: center;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
   width: 100%;
 }
 
@@ -45,15 +46,8 @@ label {
 }
 
 .input-field {
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 0.2rem;
   font-size: 1rem;
   transition: border-color 0.2s;
-}
-
-.input-field:focus {
-  outline: none;
-  border-color: #23568b;
 }
 </style>
