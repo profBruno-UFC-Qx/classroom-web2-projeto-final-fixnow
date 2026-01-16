@@ -15,7 +15,6 @@ const authStore = useAuthStore();
     </div>
     <div class="navbar-menu">
       <div>
-        <RouterLink class="navbar-item" to="/">Home</RouterLink>
         <RouterLink class="navbar-item" to="/about">Sobre</RouterLink>
         <template v-if="authStore.isLoggedIn">
           <RouterLink class="navbar-item" to="/perfil">Perfil</RouterLink>

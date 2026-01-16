@@ -3,8 +3,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
+  OneToMany
 } from 'typeorm'
+import { Review } from './Review'
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -37,4 +39,10 @@ export class User {
 
   @UpdateDateColumn()
   updated_at!: Date
+
+  @OneToMany(() => Review, (review) => review.client)
+  reviewsGiven!: Review[]
+
+  @OneToMany(() => Review, (review) => review.technician)
+  reviewsReceived!: Review[]
 }
