@@ -63,7 +63,7 @@
                     <div class="team-member">
                         <div class="avatar">KS</div>
                         <div class="details">
-                            <h4>Kaio Davidson</h4>
+                            <h4>Kaio Davidson Santos Sampaio</h4>
                             <span>Fullstack Developer</span>
                         </div>
                     </div>

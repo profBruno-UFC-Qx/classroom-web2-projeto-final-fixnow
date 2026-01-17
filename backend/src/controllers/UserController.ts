@@ -3,6 +3,7 @@ import { CreateUserService } from '../services/CreateUserService'
 import { ListUsersService } from '../services/ListUsersService'
 import { GetUserByIdService } from '../services/GetUserByIdService'
 import { UpdateUserService } from '../services/UpdateUserService'
+import { UpdateProfileImageService } from '../services/UpdateProfileImageService'
 import { DeleteUserService } from '../services/DeleteUserService'
 import { UserRole } from '../entities/User'
 
@@ -39,22 +40,81 @@ export class UserController {
 
   async update(req: Request, res: Response) {
     const { id } = req.params
-    const { name, email, password, role } = req.body
+    const { name, email, password, role, profession, phone } = req.body
+    const userId = (req as any).user?.id
 
-    const service = new UpdateUserService()
-    const user = await service.execute({
-      id,
-      name,
-      email,
-      password,
-      role: role as UserRole // 👈 cast necessário
-    })
+    // Verificar autorização: apenas pode atualizar sua própria conta
+    if (userId !== Number(id)) {
+      return res.status(403).json({ 
+        message: 'Acesso negado: você só pode atualizar sua própria conta' 
+      })
+    }
 
-    return res.json(user)
+    try {
+      const service = new UpdateUserService()
+      const user = await service.execute({
+        id,
+        name,
+        email,
+        password,
+        role: role as UserRole, // 👈 cast necessário
+        profession,
+        phone
+      })
+
+      return res.json(user)
+    } catch (error: any) {
+      console.error('Erro ao atualizar usuário:', error)
+      return res.status(400).json({ 
+        message: error.message || 'Erro ao atualizar perfil' 
+      })
+    }
+  }
+
+  async uploadProfileImage(req: Request, res: Response) {
+    const { id } = req.params
+    const { profileImage } = req.body
+    const userId = (req as any).user?.id
+
+    // Verificar autorização
+    if (userId !== Number(id)) {
+      return res.status(403).json({ 
+        message: 'Acesso negado: você só pode atualizar sua própria foto' 
+      })
+    }
+
+    if (!profileImage) {
+      return res.status(400).json({ 
+        message: 'Imagem é obrigatória' 
+      })
+    }
+
+    try {
+      const service = new UpdateProfileImageService()
+      const user = await service.execute({
+        id,
+        profileImage
+      })
+
+      return res.json(user)
+    } catch (error: any) {
+      console.error('Erro ao fazer upload da imagem:', error)
+      return res.status(400).json({ 
+        message: error.message || 'Erro ao fazer upload da imagem' 
+      })
+    }
   }
 
   async delete(req: Request, res: Response) {
     const { id } = req.params
+    const userId = (req as any).user?.id
+
+    // Verificar autorização: apenas pode deletar sua própria conta
+    if (userId !== Number(id)) {
+      return res.status(403).json({ 
+        message: 'Acesso negado: você só pode deletar sua própria conta' 
+      })
+    }
 
     const service = new DeleteUserService()
     const result = await service.execute({ id })

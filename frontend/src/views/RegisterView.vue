@@ -11,7 +11,6 @@ const name = ref('');
 const email = ref('');
 const password = ref('');
 const role = ref('CLIENTE');
-const profession = ref('');
 const errorMessage = ref('');
 
 async function register() {
@@ -21,18 +20,12 @@ async function register() {
       errorMessage.value = 'Por favor, preencha todos os campos obrigatórios.';
       return;
     }
-
-    if (role.value === 'TECNICO' && !profession.value) {
-      errorMessage.value = 'Por favor, informe a profissão.';
-      return;
-    }
     
     const userData = {
       name: name.value,
       email: email.value,
       password: password.value,
       role: role.value,
-      profession: profession.value
     };
 
     await api.post('/users', userData);
@@ -59,11 +52,6 @@ async function register() {
             <option value="CLIENTE">Cliente</option>
             <option value="TECNICO">Técnico</option>
           </select>
-        </div>
-
-        
-        <div v-if="role === 'TECNICO'" class="form-group">
-          <Input label="Profissão" v-model="profession" placeholder="Ex: Eletricista, Encanador" />
         </div>
 
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>

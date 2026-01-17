@@ -8,6 +8,8 @@ interface CardItem {
   image: string;
   provider?: string;
   price?: string;
+  rating?: number;
+  reviewCount?: number;
 }
 
 defineProps<{
@@ -17,7 +19,11 @@ defineProps<{
 const router = useRouter();
 
 function goToDetails(id: number) {
-  router.push('/details');
+  router.push(`/details/${id}`);
+}
+
+function renderStars(stars: number) {
+  return '⭐'.repeat(Math.round(stars)) + '☆'.repeat(5 - Math.round(stars));
 }
 </script>
 <template>
@@ -27,6 +33,14 @@ function goToDetails(id: number) {
       <div class="card-content">
         <h3 class="card-title">{{ item.title }}</h3>
         <p v-if="item.provider" class="card-provider"><strong>Prestador:</strong> {{ item.provider }}</p>
+        
+        <!-- Rating Section -->
+        <div v-if="item.rating !== undefined" class="card-rating">
+          <span class="stars">{{ renderStars(item.rating) }}</span>
+          <span class="rating-value">{{ item.rating.toFixed(1) }}</span>
+          <span class="review-count">({{ item.reviewCount || 0 }})</span>
+        </div>
+        
         <p class="card-description">{{ item.description }}</p>
         <p v-if="item.price" class="card-price"><strong>Valor:</strong> {{ item.price }}</p>
         <button class="card-button" @click="goToDetails(item.id)">Ver Detalhes</button>
@@ -111,5 +125,27 @@ function goToDetails(id: number) {
 
 .card-button:hover {
   background-color: #45a049;
+}
+
+.card-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+  font-size: 0.9rem;
+}
+
+.card-rating .stars {
+  font-size: 1rem;
+}
+
+.rating-value {
+  font-weight: bold;
+  color: #333;
+}
+
+.review-count {
+  color: #999;
+  font-size: 0.85rem;
 }
 </style>

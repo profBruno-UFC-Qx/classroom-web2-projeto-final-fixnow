@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { UserController } from '../controllers/UserController'
+import { authMiddleware } from '../middlewares/authMiddleware'
 
 const usersRoutes = Router()
 const userController = new UserController()
@@ -73,26 +74,49 @@ usersRoutes.get('/:id', userController.show)
  * @swagger
  * /users/{id}:
  *   put:
- *     summary: Atualiza um usuário
+ *     summary: Atualiza um usuário (requer autenticação)
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               role:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Usuário atualizado
+ *       401:
+ *         description: Não autorizado
+ *       403:
+ *         description: Acesso negado (apenas pode atualizar sua própria conta)
  */
-usersRoutes.put('/:id', userController.update)
+usersRoutes.put('/:id', authMiddleware, userController.update)
 
 /**
  * @swagger
  * /users/{id}:
  *   delete:
- *     summary: Remove um usuário
+ *     summary: Remove um usuário (requer autenticação)
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -102,7 +126,49 @@ usersRoutes.put('/:id', userController.update)
  *     responses:
  *       200:
  *         description: Usuário removido
+ *       401:
+ *         description: Não autorizado
+ *       403:
+ *         description: Acesso negado (apenas pode deletar sua própria conta)
  */
-usersRoutes.delete('/:id', userController.delete)
+usersRoutes.delete('/:id', authMiddleware, userController.delete)
+
+/**
+ * @swagger
+ * /users/{id}/profile-image:
+ *   post:
+ *     summary: Faz upload da foto de perfil (requer autenticação)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - profileImage
+ *             properties:
+ *               profileImage:
+ *                 type: string
+ *                 description: Imagem em formato base64 (data:image/...)
+ *     responses:
+ *       200:
+ *         description: Foto de perfil atualizada
+ *       400:
+ *         description: Erro ao fazer upload
+ *       401:
+ *         description: Não autorizado
+ *       403:
+ *         description: Acesso negado (apenas pode atualizar sua própria foto)
+ */
+usersRoutes.post('/:id/profile-image', authMiddleware, userController.uploadProfileImage)
 
 export { usersRoutes }

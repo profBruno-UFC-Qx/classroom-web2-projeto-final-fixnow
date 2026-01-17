@@ -11,16 +11,45 @@ onMounted(async () => {
   try {
     const response = await api.get('/users');
     // Filtra apenas os técnicos e mapeia para o formato do Card
-    services.value = response.data
-      .filter((user: any) => user.role === 'TECNICO')
-      .map((user: any) => ({
-        id: user.id,
-        title: user.profession || 'Tecnico', //Nao estou conseguindo pegar a profissao que foi cadastrada no backend
-        description: user.serviceDescription || 'Entre em contato para mais detalhes.',
-        image: user.serviceImage || 'https://placehold.co/600x400/EEE/31343C?text=Serviço',
-        provider: user.name,
-        price: user.servicePrice || 'A combinar'
-      }));
+    const technicians = response.data.filter((user: any) => user.role === 'TECNICO');
+    
+    // Buscar reviews para cada técnico
+    const servicesWithRatings = await Promise.all(
+      technicians.map(async (user: any) => {
+        try {
+          const reviewsResponse = await api.get(`/reviews/${user.id}`);
+          const reviews = reviewsResponse.data;
+          const averageRating = reviews.length > 0
+            ? reviews.reduce((acc: number, review: any) => acc + review.stars, 0) / reviews.length
+            : 0;
+          
+          return {
+            id: user.id,
+            title: user.profession || 'Técnico',
+            description: user.serviceDescription || 'Entre em contato para mais detalhes.',
+            image: user.profileImage || 'https://placehold.co/600x400/EEE/31343C?text=Técnico',
+            provider: user.name,
+            price: user.servicePrice || 'A combinar',
+            rating: averageRating,
+            reviewCount: reviews.length
+          };
+        } catch (error) {
+          console.error(`Erro ao carregar reviews do técnico ${user.id}:`, error);
+          return {
+            id: user.id,
+            title: user.profession || 'Técnico',
+            description: user.serviceDescription || 'Entre em contato para mais detalhes.',
+            image: user.profileImage || 'https://placehold.co/600x400/EEE/31343C?text=Técnico',
+            provider: user.name,
+            price: user.servicePrice || 'A combinar',
+            rating: 0,
+            reviewCount: 0
+          };
+        }
+      })
+    );
+    
+    services.value = servicesWithRatings;
   } catch (error) {
     console.error('Erro ao carregar serviços:', error);
   }

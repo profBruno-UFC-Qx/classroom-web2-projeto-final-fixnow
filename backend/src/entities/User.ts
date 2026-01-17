@@ -34,6 +34,24 @@ export class User {
   })
   role!: UserRole
 
+  @Column({
+    type: 'text',
+    nullable: true
+  })
+  profession?: string
+
+  @Column({
+    type: 'text',
+    nullable: true
+  })
+  profileImage?: string
+
+  @Column({
+    type: 'text',
+    nullable: true
+  })
+  phone?: string
+
   @CreateDateColumn()
   created_at!: Date
 
