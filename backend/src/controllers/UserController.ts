@@ -16,7 +16,7 @@ export class UserController {
       name,
       email,
       password,
-      role: role as UserRole // 👈 cast controlado
+      role: role as UserRole // cast controlado
     })
 
     return res.status(201).json(user)
@@ -57,7 +57,7 @@ export class UserController {
         name,
         email,
         password,
-        role: role as UserRole, // 👈 cast necessário
+        role: role as UserRole, //  cast necessário
         profession,
         phone
       })
@@ -120,5 +120,47 @@ export class UserController {
     const result = await service.execute({ id })
 
     return res.json(result)
+  }
+
+  public getCategories(req: Request, res: Response) {
+    const categories = [
+      'Eletricista',
+      'Encanador',
+      'Pedreiro',
+      'Carpinteiro',
+      'Pintor',
+      'Mecânico',
+      'Soldador',
+      'Refrigeração',
+      'Gás',
+      'Telecomunicações',
+      'Outro'
+    ];
+
+    return res.json(categories);
+  }
+
+  async seedAdmin(req: Request, res: Response) {
+    try {
+      //  Verifica se já existe algum administrador no sistema
+      const listService = new ListUsersService()
+      const users = await listService.execute()
+      const adminExists = users.some((u: any) => u.role === 'ADMIN')
+
+      if (adminExists) {
+        return res.status(403).json({ message: "Acesso negado: Já existe um administrador cadastrado no sistema." })
+      }
+
+      const service = new CreateUserService()
+      const user = await service.execute({
+        name: "Administrador",
+        email: "admin@fixnow.com",
+        password: "admin",
+        role: "ADMIN" as UserRole
+      })
+      return res.status(201).json(user)
+    } catch (error: any) {
+      return res.status(400).json({ message: "Erro ao criar admin (talvez já exista): " + error.message })
+    }
   }
 }

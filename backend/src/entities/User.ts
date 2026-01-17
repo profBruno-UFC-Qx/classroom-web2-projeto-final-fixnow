@@ -58,9 +58,9 @@ export class User {
   @UpdateDateColumn()
   updated_at!: Date
 
-  @OneToMany(() => Review, (review) => review.client)
+  @OneToMany(() => Review, (review) => review.client, { cascade: true })
   reviewsGiven!: Review[]
 
-  @OneToMany(() => Review, (review) => review.technician)
+  @OneToMany(() => Review, (review) => review.technician, { cascade: true })
   reviewsReceived!: Review[]
 }

@@ -19,7 +19,11 @@ async function login() {
   }
   try {
     await authStore.login(email.value, password.value)
-    router.push('/') 
+    if (authStore.user?.role === 'ADMIN') {
+      router.push('/admin')
+    } else {
+      router.push('/')
+    }
   } catch (error) {
     errorMessage.value = 'Falha no login. Verifique suas credenciais.'
   }

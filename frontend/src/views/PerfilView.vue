@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useCategoriesStore } from '../stores/categories';
 import { api } from '../services/api';
 import Navbar from '../components/Navbar.vue';
 import Footer from '../components/Footer.vue';
@@ -8,6 +9,7 @@ import Input from '../components/Input.vue';
 import Password from '../components/Password.vue';
 
 const authStore = useAuthStore();
+const categoriesStore = useCategoriesStore();
 const user = ref(authStore.user);
 
 // Campos do formulário
@@ -22,22 +24,9 @@ const errorMessage = ref('');
 const isLoading = ref(false);
 const uploadingImage = ref(false);
 
-// Categorias de profissão disponíveis
-const professions = [
-  'Eletricista',
-  'Encanador',
-  'Pedreiro',
-  'Carpinteiro',
-  'Pintor',
-  'Mecânico',
-  'Soldador',
-  'Refrigeração',
-  'Gás',
-  'Telecomunicações',
-  'Outro'
-];
-
 onMounted(() => {
+  categoriesStore.fetchCategories();
+
   if (user.value) {
     name.value = user.value.name;
     email.value = user.value.email;
@@ -230,8 +219,8 @@ async function updateProfile() {
             required
           >
             <option value="">Selecione uma profissão</option>
-            <option v-for="prof in professions" :key="prof" :value="prof">
-              {{ prof }}
+            <option v-for="category in categoriesStore.categories" :key="category" :value="category">
+              {{ category }}
             </option>
           </select>
         </div>

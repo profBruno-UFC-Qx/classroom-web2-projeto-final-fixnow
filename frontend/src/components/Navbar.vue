@@ -15,15 +15,16 @@ const authStore = useAuthStore();
     </div>
     <div class="navbar-menu">
       <div>
-        <RouterLink class="navbar-item" to="/about">Sobre</RouterLink>
         <template v-if="authStore.isLoggedIn">
           <RouterLink class="navbar-item" to="/perfil">Perfil</RouterLink>
+          <RouterLink v-if="authStore.user?.role === 'ADMIN'" class="navbar-item" to="/admin">Painel Admin</RouterLink>
           <a class="navbar-item" @click="authStore.logout">Sair</a>
         </template>
         <template v-else>
           <RouterLink class="navbar-item" to="/login">Login</RouterLink>
           <RouterLink class="navbar-item" to="/register">Registrar</RouterLink>
         </template>
+        <RouterLink class="navbar-item" to="/about">Sobre</RouterLink>
         </div>
       </div>
   </nav>

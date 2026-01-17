@@ -54,6 +54,30 @@ usersRoutes.get('/', userController.list)
 
 /**
  * @swagger
+ * /users/categories:
+ *   get:
+ *     summary: Lista as categorias de profissões disponíveis
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Lista de categorias
+ */
+usersRoutes.get('/categories', userController.getCategories)
+
+/**
+ * @swagger
+ * /users/seed-admin:
+ *   post:
+ *     summary: Cria um usuário administrador padrão (Seed)
+ *     tags: [Users]
+ *     responses:
+ *       201:
+ *         description: Admin criado com sucesso
+ */
+usersRoutes.post('/seed-admin', userController.seedAdmin)
+
+/**
+ * @swagger
  * /users/{id}:
  *   get:
  *     summary: Obtém um usuário pelo ID

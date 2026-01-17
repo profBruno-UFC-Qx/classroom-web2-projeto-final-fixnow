@@ -43,6 +43,18 @@ const routes = [
     name: 'Details',
     component: DetailsView,
     meta: { requiresAuth: false }
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: () => import('../views/AdminView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/users',
+    name: 'AdminUsers',
+    component: () => import('../views/UserListView.vue'),
+    meta: { requiresAuth: true }
   }
 ];
 
@@ -50,6 +62,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
+
 
 // Guard de proteção de rotas
 router.beforeEach((to, from, next) => {

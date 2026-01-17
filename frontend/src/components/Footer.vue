@@ -5,7 +5,7 @@
 </template>
 <style scoped>
 .footer {
-  background-color: #f8f9fa;
+  background-color: #white;
   text-align: center;
   padding: 1rem 0;
   position: relative;
