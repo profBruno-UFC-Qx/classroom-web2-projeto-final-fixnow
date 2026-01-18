@@ -37,6 +37,20 @@ const isLoading = ref(true);
 const errorMessage = ref('');
 const successMessage = ref('');
 
+// Modal de agendamento
+const showScheduleModal = ref(false);
+const isSubmittingAppointment = ref(false);
+const appointmentForm = ref({
+  title: '',
+  description: '',
+  category: '',
+  scheduledDate: '',
+  address: '',
+  city: '',
+  phone: '',
+  notes: ''
+});
+
 // Form de review
 const reviewForm = ref({
   stars: 5,
@@ -93,6 +107,71 @@ onMounted(async () => {
 
 function goBack() {
   router.back();
+}
+
+function openScheduleModal() {
+  if (!authStore.isLoggedIn) {
+    router.push('/login');
+    return;
+  }
+  
+  if (authStore.user?.role !== 'CLIENTE') {
+    errorMessage.value = 'Apenas clientes podem agendar serviços';
+    return;
+  }
+
+  showScheduleModal.value = true;
+  // Preencher categoria com a profissão do técnico
+  appointmentForm.value.category = technician.value?.profession || '';
+}
+
+function closeScheduleModal() {
+  showScheduleModal.value = false;
+  appointmentForm.value = {
+    title: '',
+    description: '',
+    category: '',
+    scheduledDate: '',
+    address: '',
+    city: '',
+    phone: '',
+    notes: ''
+  };
+}
+
+async function submitAppointment() {
+  if (!appointmentForm.value.title.trim() || !appointmentForm.value.description.trim() || !appointmentForm.value.scheduledDate) {
+    errorMessage.value = 'Por favor, preencha os campos obrigatórios';
+    return;
+  }
+
+  isSubmittingAppointment.value = true;
+  
+  try {
+    await api.post('/appointments', {
+      clientId: authStore.user?.id,
+      technicianId: technician.value?.id,
+      title: appointmentForm.value.title,
+      description: appointmentForm.value.description,
+      category: appointmentForm.value.category,
+      scheduledDate: appointmentForm.value.scheduledDate,
+      address: appointmentForm.value.address,
+      city: appointmentForm.value.city,
+      phone: appointmentForm.value.phone,
+      notes: appointmentForm.value.notes
+    });
+
+    successMessage.value = 'Agendamento criado com sucesso! Veja seus agendamentos no navbar.';
+    closeScheduleModal();
+    
+    setTimeout(() => {
+      successMessage.value = '';
+    }, 3000);
+  } catch (error: any) {
+    errorMessage.value = error.response?.data?.message || 'Erro ao criar agendamento';
+  } finally {
+    isSubmittingAppointment.value = false;
+  }
 }
 
 async function submitReview() {
@@ -187,8 +266,8 @@ async function submitReview() {
             <p><strong>Membro desde:</strong> {{ formatDate(technician.created_at) }}</p>
           </div>
 
-          <button class="btn-schedule">
-            📅 Agendar
+          <button @click="openScheduleModal" class="btn-schedule">
+            Agendar
           </button>
         </div>
       </div>
@@ -227,7 +306,7 @@ async function submitReview() {
         
         <!-- Self Review Block -->
         <div v-if="isSelfReview" class="self-review-block">
-          <p>⚠️ Você não pode avaliar a si mesmo. Apenas clientes podem deixar avaliações.</p>
+          <p> ! Você não pode avaliar a si mesmo. Apenas clientes podem deixar avaliações.</p>
         </div>
 
         <!-- Review Form -->
@@ -286,6 +365,105 @@ async function submitReview() {
     </div>
   </div>
   <Footer />
+
+  <!-- Modal de Agendamento -->
+  <div v-if="showScheduleModal" class="modal-overlay" @click="closeScheduleModal">
+    <div class="modal-content" @click.stop>
+      <button class="modal-close" @click="closeScheduleModal">✕</button>
+      
+      <h2>Agendar Serviço com {{ technician?.name }}</h2>
+
+      <form @submit.prevent="submitAppointment">
+        <div class="form-group">
+          <label>Título do Serviço *</label>
+          <input 
+            v-model="appointmentForm.title"
+            type="text"
+            placeholder="Ex: Reparo na torneira"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Descrição *</label>
+          <textarea
+            v-model="appointmentForm.description"
+            placeholder="Descreva o problema e o que precisa ser feito"
+            rows="4"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Categoria</label>
+          <input 
+            v-model="appointmentForm.category"
+            type="text"
+            placeholder="Categoria do serviço"
+            disabled
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Data e Hora *</label>
+          <input 
+            v-model="appointmentForm.scheduledDate"
+            type="datetime-local"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Endereço</label>
+          <input 
+            v-model="appointmentForm.address"
+            type="text"
+            placeholder="Rua, número"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Cidade</label>
+          <input 
+            v-model="appointmentForm.city"
+            type="text"
+            placeholder="Sua cidade"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Telefone para Contato</label>
+          <input 
+            v-model="appointmentForm.phone"
+            type="tel"
+            placeholder="(11) 99999-9999"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Notas Adicionais</label>
+          <textarea
+            v-model="appointmentForm.notes"
+            placeholder="Qualquer informação adicional"
+            rows="3"
+          />
+        </div>
+
+        <div v-if="errorMessage" class="error-alert">
+          {{ errorMessage }}
+        </div>
+
+        <div class="form-actions">
+          <button type="button" @click="closeScheduleModal" class="btn-cancel">
+            Cancelar
+          </button>
+          <button type="submit" :disabled="isSubmittingAppointment" class="btn-submit">
+            {{ isSubmittingAppointment ? 'Criando...' : 'Criar Agendamento' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -692,5 +870,137 @@ async function submitReview() {
   .details-container {
     padding: 1rem;
   }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 4px rgba(46, 125, 50, 0.2);
+}
+
+.form-group input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.error-alert {
+  background: #ffebee;
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid #ef5350;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.btn-cancel,
+.btn-submit {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.btn-cancel {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.btn-cancel:hover {
+  background: #e0e0e0;
+}
+
+.btn-submit {
+  background: #2e7d32;
+  color: white;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #1b5e20;
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

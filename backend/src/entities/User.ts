@@ -7,6 +7,7 @@ import {
   OneToMany
 } from 'typeorm'
 import { Review } from './Review'
+import { Appointment } from './Appointment'
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -63,4 +64,10 @@ export class User {
 
   @OneToMany(() => Review, (review) => review.technician, { cascade: true })
   reviewsReceived!: Review[]
+
+  @OneToMany(() => Appointment, (appointment) => appointment.client, { cascade: true })
+  appointmentsAsClient!: Appointment[]
+
+  @OneToMany(() => Appointment, (appointment) => appointment.technician, { cascade: true })
+  appointmentsAsTechnician!: Appointment[]
 }

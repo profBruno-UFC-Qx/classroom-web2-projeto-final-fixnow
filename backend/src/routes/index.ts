@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { usersRoutes } from './users.routes'
 import { categoriesRoutes } from './categories.routes'
+import { appointmentsRoutes } from './appointments.routes'
 import { AuthController } from '../controllers/AuthController'
 import { ReviewController } from '../controllers/ReviewController'
 import { authMiddleware } from '../middlewares/authMiddleware'
@@ -30,6 +31,7 @@ routes.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 routes.use('/users', usersRoutes);
 routes.use('/categories', categoriesRoutes);
+routes.use('/appointments', appointmentsRoutes);
 
 /**
  * @swagger
