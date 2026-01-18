@@ -4,10 +4,12 @@ import { api } from '../services/api';
 import Navbar from '../components/Navbar.vue';
 import Footer from '../components/Footer.vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 import { useCategoriesStore } from '../stores/categories';
 import { Trash2 } from 'lucide-vue-next';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const categoriesStore = useCategoriesStore();
 const users = ref<any[]>([]);
 const searchQuery = ref('');
@@ -16,6 +18,13 @@ const currentPage = ref(1);
 const itemsPerPage = 5;
 const showDeleteModal = ref(false);
 const userToDeleteId = ref<number | null>(null);
+
+// Proteção extra: se não for admin, manda pra home
+const checkAdmin = () => {
+  if (authStore.user?.role !== 'ADMIN') {
+    router.push('/');
+  }
+};
 
 const filteredUsers = computed(() => {
   return users.value.filter((user: any) => {
@@ -94,6 +103,7 @@ function goBack() {
 }
 
 onMounted(() => {
+  checkAdmin();
   fetchUsers();
   categoriesStore.fetchCategories();
 });

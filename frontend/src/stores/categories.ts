@@ -3,29 +3,18 @@ import { defineStore } from 'pinia';
 import { api } from '../services/api';
 
 export const useCategoriesStore = defineStore('categories', () => {
-  // Lista padrão inicial (fallback)
-  const categories = ref<string[]>([
-    'Eletricista',
-    'Encanador',
-    'Pedreiro',
-    'Carpinteiro',
-    'Pintor',
-    'Mecânico',
-    'Soldador',
-    'Refrigeração',
-    'Gás',
-    'Telecomunicações',
-    'Outro'
-  ]);
+  const categories = ref<any[]>([]);
 
   async function fetchCategories() {
     try {
-      const { data } = await api.get('/users/categories');
+      const { data } = await api.get('/categories');
       if (Array.isArray(data)) {
-        categories.value = data;
+        // Mapear para apenas nomes se vier com objeto completo
+        categories.value = data.map((cat: any) => typeof cat === 'string' ? cat : cat.name);
       }
     } catch (error) {
-      console.warn('Usando categorias padrão (API offline ou endpoint não existe)');
+      console.warn('Erro ao buscar categorias:', error);
+      categories.value = [];
     }
   }
 

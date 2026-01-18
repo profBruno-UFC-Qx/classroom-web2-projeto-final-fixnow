@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { UserController } from '../controllers/UserController'
 import { authMiddleware } from '../middlewares/authMiddleware'
+import { adminMiddleware } from '../middlewares/adminMiddleware'
 
 const usersRoutes = Router()
 const userController = new UserController()
@@ -44,25 +45,31 @@ usersRoutes.post('/', userController.create)
  * @swagger
  * /users:
  *   get:
- *     summary: Lista todos os usuários
+ *     summary: Lista todos os usuários (requer autenticação de ADMIN)
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de usuários
+ *       401:
+ *         description: Não autorizado
+ *       403:
+ *         description: Acesso negado (apenas admins)
  */
-usersRoutes.get('/', userController.list)
+usersRoutes.get('/', authMiddleware, adminMiddleware, userController.list)
 
 /**
  * @swagger
- * /users/categories:
+ * /users/technicians:
  *   get:
- *     summary: Lista as categorias de profissões disponíveis
+ *     summary: Lista todos os técnicos (público)
  *     tags: [Users]
  *     responses:
  *       200:
- *         description: Lista de categorias
+ *         description: Lista de técnicos
  */
-usersRoutes.get('/categories', userController.getCategories)
+usersRoutes.get('/technicians', userController.listTechnicians)
 
 /**
  * @swagger

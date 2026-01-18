@@ -8,7 +8,7 @@ import Footer from '../components/Footer.vue'
 import { useCategoriesStore } from '../stores/categories'
 
 const router = useRouter()
-const services = ref([])
+const services = ref<any[]>([])
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const categoriesStore = useCategoriesStore()
@@ -42,9 +42,9 @@ onMounted(async () => {
   categoriesStore.fetchCategories();
 
   try {
-    const response = await api.get('/users');
+    const response = await api.get('/users/technicians');
     // Filtra apenas os técnicos e mapeia para o formato do Card
-    const technicians = response.data.filter((user: any) => user.role === 'TECNICO');
+    const technicians = response.data;
     
     // Buscar reviews para cada técnico
     const servicesWithRatings = await Promise.all(

@@ -55,6 +55,12 @@ const routes = [
     name: 'AdminUsers',
     component: () => import('../views/UserListView.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/categories',
+    name: 'AdminCategories',
+    component: () => import('../views/CategoriesView.vue'),
+    meta: { requiresAuth: true }
   }
 ];
 
@@ -65,7 +71,7 @@ const router = createRouter({
 
 
 // Guard de proteção de rotas
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore();
   const requiresAuth = to.meta.requiresAuth;
 
@@ -76,6 +82,14 @@ router.beforeEach((to, from, next) => {
   } else if ((to.name === 'Login' || to.name === 'Register') && authStore.isLoggedIn) {
     // Usuário já logado tentando acessar login/register
     next('/');
+  } else if (to.name === 'Admin' || to.name === 'AdminUsers' || to.name === 'AdminCategories') {
+    // Validar se é admin
+    if (authStore.user?.role !== 'ADMIN') {
+      console.warn(`Acesso negado a ${to.path}. Apenas admins podem acessar.`);
+      next('/');
+    } else {
+      next();
+    }
   } else {
     next();
   }

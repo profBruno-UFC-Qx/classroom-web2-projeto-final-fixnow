@@ -19,11 +19,11 @@ export class Review {
   @Column('text')
   comment!: string
 
-  @ManyToOne(() => User, (user) => user.reviewsGiven)
+  @ManyToOne(() => User, (user) => user.reviewsGiven, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'client_id' })
   client!: User
 
-  @ManyToOne(() => User, (user) => user.reviewsReceived)
+  @ManyToOne(() => User, (user) => user.reviewsReceived, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'technician_id' })
   technician!: User
 

@@ -29,6 +29,14 @@ export class UserController {
     return res.json(users)
   }
 
+  async listTechnicians(req: Request, res: Response) {
+    const service = new ListUsersService()
+    const users = await service.execute()
+    const technicians = users.filter((user: any) => user.role === 'TECNICO')
+
+    return res.json(technicians)
+  }
+
   async show(req: Request, res: Response) {
     const { id } = req.params
 
@@ -108,9 +116,10 @@ export class UserController {
   async delete(req: Request, res: Response) {
     const { id } = req.params
     const userId = (req as any).user?.id
+    const userRole = (req as any).user?.role
 
-    // Verificar autorização: apenas pode deletar sua própria conta
-    if (userId !== Number(id)) {
+    // Admin pode deletar qualquer conta, usuário comum apenas a sua própria
+    if (userRole !== 'ADMIN' && userId !== Number(id)) {
       return res.status(403).json({ 
         message: 'Acesso negado: você só pode deletar sua própria conta' 
       })
@@ -120,24 +129,6 @@ export class UserController {
     const result = await service.execute({ id })
 
     return res.json(result)
-  }
-
-  public getCategories(req: Request, res: Response) {
-    const categories = [
-      'Eletricista',
-      'Encanador',
-      'Pedreiro',
-      'Carpinteiro',
-      'Pintor',
-      'Mecânico',
-      'Soldador',
-      'Refrigeração',
-      'Gás',
-      'Telecomunicações',
-      'Outro'
-    ];
-
-    return res.json(categories);
   }
 
   async seedAdmin(req: Request, res: Response) {

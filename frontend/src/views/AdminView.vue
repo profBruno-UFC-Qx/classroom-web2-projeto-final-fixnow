@@ -3,8 +3,7 @@ import Navbar from '../components/Navbar.vue';
 import Footer from '../components/Footer.vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
-import { onMounted, ref } from 'vue';
-import { api } from '../services/api';
+import { onMounted } from 'vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -34,7 +33,7 @@ onMounted(() => {
       <div class="dashboard-card">
         <h3>Gerenciar Categorias</h3>
         <p>Adicione ou remova categorias de serviço.</p>
-        <button class="btn-admin">Acessar</button>
+        <button class="btn-admin" @click="router.push('/admin/categories')">Acessar</button>
       </div>
     </div>
   </div>
