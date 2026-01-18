@@ -366,7 +366,7 @@ async function submitReview() {
   </div>
   <Footer />
 
-  <!-- Modal de Agendamento -->
+
   <div v-if="showScheduleModal" class="modal-overlay" @click="closeScheduleModal">
     <div class="modal-content" @click.stop>
       <button class="modal-close" @click="closeScheduleModal">✕</button>
@@ -512,7 +512,7 @@ async function submitReview() {
   gap: 2rem;
 }
 
-/* Header Section */
+
 .technician-header {
   display: grid;
   grid-template-columns: 200px 1fr;

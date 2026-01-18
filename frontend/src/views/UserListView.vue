@@ -19,7 +19,7 @@ const itemsPerPage = 5;
 const showDeleteModal = ref(false);
 const userToDeleteId = ref<number | null>(null);
 
-// Proteção extra: se não for admin, manda pra home
+//  se não for admin, manda pra home
 const checkAdmin = () => {
   if (authStore.user?.role !== 'ADMIN') {
     router.push('/');

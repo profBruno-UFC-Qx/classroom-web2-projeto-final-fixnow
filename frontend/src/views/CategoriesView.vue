@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import Navbar from '../components/Navbar.vue';
 import Footer from '../components/Footer.vue';
+import { Trash2 } from 'lucide-vue-next';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -12,6 +13,8 @@ const categories = ref<any[]>([]);
 const newCategoryName = ref('');
 const errorMessage = ref('');
 const successMessage = ref('');
+const showDeleteModal = ref(false);
+const categoryToDeleteId = ref<number | null>(null);
 
 onMounted(() => {
   // Proteção: apenas admin
@@ -53,13 +56,20 @@ async function addCategory() {
   }
 }
 
-async function deleteCategory(id: number) {
-  if (!confirm('Tem certeza que deseja deletar esta categoria?')) {
-    return;
-  }
+function openDeleteModal(id: number) {
+  categoryToDeleteId.value = id;
+  showDeleteModal.value = true;
+}
 
+function closeDeleteModal() {
+  showDeleteModal.value = false;
+  categoryToDeleteId.value = null;
+}
+
+async function confirmDeleteCategory() {
+  if (categoryToDeleteId.value === null) return;
   try {
-    await api.delete(`/categories/${id}`);
+    await api.delete(`/categories/${categoryToDeleteId.value}`);
     successMessage.value = 'Categoria deletada com sucesso!';
     errorMessage.value = '';
     setTimeout(() => successMessage.value = '', 3000);
@@ -67,6 +77,8 @@ async function deleteCategory(id: number) {
   } catch (error: any) {
     errorMessage.value = error.response?.data?.message || 'Erro ao deletar categoria';
     successMessage.value = '';
+  } finally {
+    closeDeleteModal();
   }
 }
 
@@ -110,7 +122,21 @@ function goBack() {
       <div v-else class="list">
         <div v-for="category in categories" :key="category.id" class="category-item">
           <span class="category-name">{{ category.name }}</span>
-          <button @click="deleteCategory(category.id)" class="btn-delete">🗑️ Deletar</button>
+          <button @click="openDeleteModal(category.id)" class="btn-delete" title="Deletar">
+            <Trash2 :size="18" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div v-if="showDeleteModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Confirmar Exclusão</h3>
+        <p>Tem certeza que deseja excluir esta categoria? Esta ação não pode ser desfeita.</p>
+        <div class="modal-actions">
+          <button @click="closeDeleteModal" class="btn-cancel">Cancelar</button>
+          <button @click="confirmDeleteCategory" class="btn-confirm">Excluir</button>
         </div>
       </div>
     </div>
@@ -271,12 +297,45 @@ h2 {
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  transition: all 0.3s ease;
 }
 
 .btn-delete:hover {
-  background: #ffebee;
+  opacity: 0.7;
 }
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.btn-cancel, .btn-confirm {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-cancel { background-color: #ccc; color: #333; }
+.btn-confirm { background-color: #d32f2f; color: white; }
 </style>
